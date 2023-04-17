@@ -79,7 +79,7 @@ async def root(db: Session = Depends(get_db)):
 
 @app.get("/url/")
 async def read_root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse("urlshort.html", {"request": request})
 
 
 @app.post("/url/submit")
