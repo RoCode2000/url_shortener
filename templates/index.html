@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL SHORTERNER</title>
+
+    <style>
+        /* Style the form container */
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        /* Style the H1 */
+        h1 {
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Style the form inputs */
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            width: 800px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 10px;
+            margin: 8px 0;
+            box-sizing: border-box;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        /* Style the submit button */
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease-in-out;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #45a049;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+
+        #short-url {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 20px auto;
+            width: 50%;
+            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            height: 25px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            line-height: 25px;
+        }
+    </style>
+
+
+</head>
+
+<body>
+    <h1>URL Shortener</h1>
+
+    <div class="form-container">
+        <form id="url-form">
+            <div class="form-row">
+                <label for="url-input">URL:</label>
+                <input type="text" id="url-input" name="url">
+            </div>
+            <input type="submit"></input>
+        </form>
+    </div>
+
+    <div id="short-url"></div>
+
+</body>
+<script>
+    const form = document.querySelector('#url-form');
+    const urlInput = document.querySelector('#url-input');
+    const shortUrl = document.querySelector('#short-url');
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const url = urlInput.value;
+        const response = await fetch('http://127.0.0.1:8000/url/submit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ url })
+        });
+        const data = await response.json();
+        shortUrl.innerHTML = `Short URL: <a href="${data.url}">${data.short_url_key}</a>`;
+        console.log(data)
+    });
+</script>
+
+</html>
