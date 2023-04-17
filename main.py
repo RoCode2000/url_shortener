@@ -20,12 +20,9 @@ engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-x = None
-
-
 class Item(BaseModel):
     url: str
-    short_url_key: str | x
+    short_url_key: str
 
 
 Base = declarative_base()
