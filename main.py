@@ -22,7 +22,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 class Item(BaseModel):
     url: str
-    short_url_key: str
+    short_url_key: str | None
 
 
 Base = declarative_base()
