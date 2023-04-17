@@ -22,7 +22,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 class Item(BaseModel):
     url: str
-    short_url_key: str | None
+    # short_url_key: None | str
 
 
 Base = declarative_base()
@@ -84,21 +84,22 @@ async def read_root(request: Request):
 
 @app.post("/url/submit")
 async def get_url(og_url: Item, db: Session = Depends(get_db)):
+    print(og_url)
     original_url = og_url.url
 
     if validators.url(original_url):
         hash_object = hashlib.md5(original_url.encode())
         hash_str = hash_object.hexdigest()
         short_url_key = create_random_key(6) + "_" + hash_str[:6]
-        og_url.short_url_key = short_url_key
+        # og_url.short_url_key = short_url_key
 
         url_mapping = UrlMapping(
             original_url=original_url, short_url_key=short_url_key)
         db.add(url_mapping)
         db.commit()
         db.refresh(url_mapping)
-
-        return og_url
+        print(url_mapping)
+        return url_mapping
     else:
         return HTTPException(status_code=400, detail="Your provided URL is not valid")
 
