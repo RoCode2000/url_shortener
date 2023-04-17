@@ -115,9 +115,8 @@
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
         const url = urlInput.value;
-        // const response = await fetch('http://127.0.0.1:8000/url/submit', {
-
-        const response = await fetch('https://url-shortener-m9mh.onrender.com/url/submit', {
+        const currentUrl = window.location.href + "submit"
+        const response = await fetch(currentUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

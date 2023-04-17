@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Index Page</title>
+
+    <style>
+        .btn {
+            display: block;
+            margin: 0 auto;
+            font-size: 2em;
+            padding: 20px 40px;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: #008CBA;
+        }
+    </style>
+
+</head>
+
+<body>
+    <button id="index-button" class="btn btn-primary" onclick="redirectURL()" type="submit">{{ button_text }}</button>
+</body>
+
+<script>
+    function redirectURL() {
+        const currentUrl = window.location.href + "url/"
+        window.location.href = currentUrl
+    }
+</script>
+
+</html>

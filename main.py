@@ -22,7 +22,6 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 class Item(BaseModel):
     url: str
-    # short_url_key: None | str
 
 
 Base = declarative_base()
@@ -73,8 +72,8 @@ app.add_middleware(
 
 
 @app.get("/")
-async def root(db: Session = Depends(get_db)):
-    return {"message": "Hello World"}
+async def root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request, "button_text": "URL-Shortener"})
 
 
 @app.get("/url/")
@@ -91,7 +90,6 @@ async def get_url(og_url: Item, db: Session = Depends(get_db)):
         hash_object = hashlib.md5(original_url.encode())
         hash_str = hash_object.hexdigest()
         short_url_key = create_random_key(6) + "_" + hash_str[:6]
-        # og_url.short_url_key = short_url_key
 
         url_mapping = UrlMapping(
             original_url=original_url, short_url_key=short_url_key)
