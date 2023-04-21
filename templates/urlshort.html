@@ -86,6 +86,34 @@
             align-items: center;
             line-height: 25px;
         }
+
+        .table-container {
+            margin: 0 auto;
+            max-width: 800px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            text-align: left;
+            font-size: 16px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
     </style>
 
 
@@ -106,6 +134,33 @@
 
     <div id="short-url"></div>
 
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Original URL</th>
+                    <th>Shortened URL</th>
+                    <th>Clicks</th>
+                    <th>Active</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in all_short_url %}
+                <tr>
+                    <td>{{ item.original_url }}</td>
+                    <td>{{ item.short_url }}</td>
+                    <td>{{ item.clicks }}</td>
+                    <td><button id="{{item.short_url}}" onclick="disableButton('{{item.short_url}}')">{{ item.is_active
+                            }}</button></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
+
 </body>
 <script>
     const form = document.querySelector('#url-form');
@@ -124,9 +179,26 @@
             body: JSON.stringify({ url })
         });
         const data = await response.json();
-        shortUrl.innerHTML = `Short URL: <a href="${data.original_url}">${data.short_url_key}</a>`;
+        shortUrl.innerHTML = `Short URL: <a href="${data.original_url}">${window.location.href}${data.short_url}</a>`;
         console.log(data)
     });
+
+    async function disableButton(url) {
+        console.log(url)
+        const currentUrl = window.location.href + url
+        const response = await fetch(currentUrl, {
+            method: 'DELETE'
+        })
+        const data = await response.json()
+        console.log(Object.keys(data).length)
+        const length = Object.keys(data).length
+        if (length === 1) {
+            const selectedButton = document.getElementById(url)
+            selectedButton.innerText = "False"
+        }
+
+    }
+
 </script>
 
 </html>

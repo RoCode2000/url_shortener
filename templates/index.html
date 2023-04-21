@@ -28,11 +28,12 @@
 </head>
 
 <body>
-    <button id="index-button" class="btn btn-primary" onclick="redirectURL()" type="submit">{{ button_text }}</button>
+    <button id="index-button" class="btn btn-primary" onclick="redirectURLShortener()" type="submit">{{ url_shortener
+        }}</button>
 </body>
 
 <script>
-    function redirectURL() {
+    function redirectURLShortener() {
         const currentUrl = window.location.href + "url/"
         window.location.href = currentUrl
     }
