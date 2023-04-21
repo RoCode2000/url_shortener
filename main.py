@@ -22,6 +22,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 class Item(BaseModel):
     url: str
+    url_base: str
 
 
 Base = declarative_base()
@@ -88,14 +89,16 @@ async def read_root(request: Request, db: Session = Depends(get_db)):
 @app.post("/url/submit")
 async def get_url(og_url: Item, db: Session = Depends(get_db)):
     original_url = og_url.url
+    url_base = og_url.url_base
 
     if not validators.url(original_url):
         return HTTPException(status_code=400, detail="Your provided URL is not valid")
 
     hash_object = hashlib.md5(original_url.encode())
     hash_str = hash_object.hexdigest()
-    short_url_key = create_random_key(6) + "_" + hash_str[:6]
-    short_url = hashlib.md5(short_url_key.encode()).hexdigest()[:6]
+    short_url_hash = create_random_key(6) + "_" + hash_str[:6]
+    short_url_key = hashlib.md5(short_url_hash.encode()).hexdigest()[:6]
+    short_url = url_base + short_url_key
 
     url_mapping = UrlMapping(
         original_url=original_url, short_url_key=short_url_key, short_url=short_url)
@@ -106,10 +109,11 @@ async def get_url(og_url: Item, db: Session = Depends(get_db)):
     return url_mapping
 
 
-@app.get("/url/{short_url}")
-async def forward_to_target_url(short_url: str, db: Session = Depends(get_db)):
+@app.get("/url/{short_url_key}")
+async def forward_to_target_url(short_url_key: str, db: Session = Depends(get_db)):
+    print(short_url_key)
     url_mapping = db.query(UrlMapping).filter(
-        UrlMapping.short_url == short_url).filter(UrlMapping.is_active == True).first()
+        UrlMapping.short_url_key == short_url_key).filter(UrlMapping.is_active == True).first()
     if url_mapping:
         url_mapping.clicks += 1
         db.commit()
@@ -118,14 +122,15 @@ async def forward_to_target_url(short_url: str, db: Session = Depends(get_db)):
         return HTTPException(status_code=404, detail="URL does not exist")
 
 
-@app.delete("/url/{short_url}")
-async def disable_target_url(short_url: str, db: Session = Depends(get_db)):
+@app.delete("/url/{short_url_key}")
+async def disable_target_url(short_url_key: str, db: Session = Depends(get_db)):
+    print(short_url_key)
     url_mapping = db.query(UrlMapping).filter(
-        UrlMapping.short_url == short_url).filter(UrlMapping.is_active == True).first()
+        UrlMapping.short_url_key == short_url_key).filter(UrlMapping.is_active == True).first()
     if url_mapping:
         url_mapping.is_active = False
         db.commit()
-        message = f"Successfully deleted shortened URL for key: {short_url}"
+        message = f"Successfully disabled shortened URL for key: {short_url_key}"
         return {"detail": message}
     else:
-        return HTTPException(status_code=404, detail="URL does not exist")
+        return HTTPException(status_code=404, detail="URL have been disabled")

@@ -149,10 +149,16 @@
                 {% for item in all_short_url %}
                 <tr>
                     <td>{{ item.original_url }}</td>
-                    <td>{{ item.short_url }}</td>
+                    <td><a href="{{item.short_url}}">{{ item.short_url }}</a></td>
                     <td>{{ item.clicks }}</td>
-                    <td><button id="{{item.short_url}}" onclick="disableButton('{{item.short_url}}')">{{ item.is_active
-                            }}</button></td>
+                    <td>
+                        {% if item.is_active == False %}
+                        <button id="{{item.short_url_key}}" disabled>{{item.is_active}}</button>
+                        {% else %}
+                        <button id="{{item.short_url_key}}"
+                            onclick="disableButton('{{item.short_url_key}}')">{{item.is_active}}</button>
+                        {% endif %}
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -170,16 +176,17 @@
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
         const url = urlInput.value;
-        const currentUrl = window.location.href + "submit"
+        const url_base = window.location.href
+        const currentUrl = url_base + "submit"
         const response = await fetch(currentUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ url })
+            body: JSON.stringify({ url, url_base })
         });
         const data = await response.json();
-        shortUrl.innerHTML = `Short URL: <a href="${data.original_url}">${window.location.href}${data.short_url}</a>`;
+        shortUrl.innerHTML = `Short URL: <a href="${data.original_url}">${data.short_url}</a>`;
         console.log(data)
     });
 
@@ -195,8 +202,8 @@
         if (length === 1) {
             const selectedButton = document.getElementById(url)
             selectedButton.innerText = "False"
+            selectedButton.disabled = true
         }
-
     }
 
 </script>
