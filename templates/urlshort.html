@@ -149,7 +149,7 @@
                 {% for item in all_short_url %}
                 <tr>
                     <td>{{ item.original_url }}</td>
-                    <td><a href="{{item.short_url}}">{{ item.short_url }}</a></td>
+                    <td><a href="{{item.short_url}}" target="_blank">{{ item.short_url }}</a></td>
                     <td>{{ item.clicks }}</td>
                     <td>
                         {% if item.is_active == False %}
