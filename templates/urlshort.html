@@ -8,11 +8,43 @@
     <title>URL SHORTERNER</title>
 
     <style>
-        /* Style the form container */
+        @media screen and (max-width: 975px) {
+            #url-form {
+                width: 700px;
+            }
+        }
+
+        @media screen and (max-width: 875px) {
+            #url-form {
+                width: 600px;
+            }
+        }
+
+        @media screen and (max-width: 426px) {
+            #short-url {
+                font-size: 12px;
+            }
+
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
+
+        @media screen and (max-width: 375px) {
+            #short-url {
+                font-size: 10px;
+            }
+        }
+
+        h1 {
+            display: flex;
+            justify-content: center;
+        }
+
         .form-container {
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
         }
 
@@ -22,21 +54,14 @@
             margin-bottom: 16px;
         }
 
-        /* Style the H1 */
-        h1 {
-            display: flex;
-            justify-content: center;
-        }
-
         /* Style the form inputs */
-        form {
+        #url-form {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             padding: 40px;
             border: 1px solid #ccc;
-            border-radius: 10px;
+            border-radius: 20px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             background-color: #fff;
             width: 800px;
@@ -75,7 +100,7 @@
             border: 1px solid #ccc;
             padding: 10px;
             margin: 20px auto;
-            width: 50%;
+            width: 60%;
             text-align: center;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
@@ -90,6 +115,9 @@
         .table-container {
             margin: 0 auto;
             max-width: 800px;
+            border-collapse: collapse;
+            border-radius: 10px;
+            overflow: hidden;
         }
 
         table {
@@ -114,55 +142,81 @@
         tr:hover {
             background-color: #f5f5f5;
         }
+
+        button {
+            background-color: #4CAF50;
+            /* set the background color */
+            color: white;
+            /* set the font color */
+            font-size: 16px;
+            /* set the font size */
+            border-radius: 8px;
+            /* set the border radius to make the edges curved */
+            padding: 8px 16px;
+            /* set the padding to make the button bigger */
+            border: none;
+            /* remove the button border */
+            cursor: pointer;
+            /* add a pointer cursor on hover */
+        }
+
+        /* styles for hover state */
+        button:hover {
+            background-color: #3e8e41;
+            /* darken the background color on hover */
+        }
     </style>
 
 
 </head>
 
 <body>
-    <h1>URL Shortener</h1>
+    <div class="container">
+        <h1>URL Shortener</h1>
 
-    <div class="form-container">
-        <form id="url-form">
-            <div class="form-row">
-                <label for="url-input">URL:</label>
-                <input type="text" id="url-input" name="url">
-            </div>
-            <input type="submit"></input>
-        </form>
-    </div>
+        <div class="form-container">
+            <form id="url-form">
+                <div class="form-row">
+                    <label for="url-input">URL:</label>
+                    <input type="text" id="url-input" name="url">
+                </div>
+                <input type="submit"></input>
+            </form>
+        </div>
 
-    <div id="short-url"></div>
+        <div id="short-url"></div>
 
 
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>Original URL</th>
-                    <th>Shortened URL</th>
-                    <th>Clicks</th>
-                    <th>Active</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in all_short_url %}
-                <tr>
-                    <td>{{ item.original_url }}</td>
-                    <td><a href="{{item.short_url}}" target="_blank">{{ item.short_url }}</a></td>
-                    <td>{{ item.clicks }}</td>
-                    <td>
-                        {% if item.is_active == False %}
-                        <button id="{{item.short_url_key}}" disabled>{{item.is_active}}</button>
-                        {% else %}
-                        <button id="{{item.short_url_key}}"
-                            onclick="disableButton('{{item.short_url_key}}')">{{item.is_active}}</button>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Original URL</th>
+                        <th>Shortened URL</th>
+                        <th>Clicks</th>
+                        <th>Active</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in all_short_url %}
+                    <tr>
+                        <td>{{ item.original_url }}</td>
+                        <td><a href="{{item.short_url}}" target="_blank">{{ item.short_url }}</a></td>
+                        <td>{{ item.clicks }}</td>
+                        <td>
+                            {% if item.is_active == False %}
+                            <button id="{{item.short_url_key}}" disabled
+                                style="background-color: #d75050;">{{item.is_active}}</button>
+                            {% else %}
+                            <button id="{{item.short_url_key}}"
+                                onclick="disableButton('{{item.short_url_key}}')">{{item.is_active}}</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
 
@@ -203,6 +257,7 @@
             const selectedButton = document.getElementById(url)
             selectedButton.innerText = "False"
             selectedButton.disabled = true
+            selectedButton.style.backgroundColor = "#d75050"
         }
     }
 
