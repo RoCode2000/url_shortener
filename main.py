@@ -1,45 +1,17 @@
+from sqlalchemy.orm import Session
+from fastapi.responses import RedirectResponse
+from fastapi.templating import Jinja2Templates
+# from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, Request, HTTPException, Depends
 import validators
 import hashlib
 
-import secrets
-import string
-
-from fastapi import FastAPI, Request, HTTPException, Depends
-from pydantic import BaseModel
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.templating import Jinja2Templates
-from fastapi.responses import RedirectResponse
-
-from sqlalchemy import create_engine, Column, Integer, String, Boolean
-from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.ext.declarative import declarative_base
-
-SQLALCHEMY_DATABASE_URL = "sqlite:///./url_shortener.db"
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={
-                       "check_same_thread": False})
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+from keygen import create_random_key
+import models
+import database
 
 
-class Item(BaseModel):
-    url: str
-    url_base: str
-
-
-Base = declarative_base()
-
-
-class UrlMapping(Base):
-    __tablename__ = "url_mappings"
-
-    id = Column(Integer, primary_key=True, index=True)
-    original_url = Column(String, index=True)
-    short_url_key = Column(String, index=True, unique=True)
-    short_url = Column(String, index=True, unique=True)
-    clicks = Column(Integer, default=0)
-    is_active = Column(Boolean, default=True)
-
-
-Base.metadata.create_all(bind=engine)
+models.Base.metadata.create_all(bind=database.engine)
 
 
 app = FastAPI()
@@ -48,29 +20,24 @@ templates = Jinja2Templates(directory="templates")
 
 def get_db():
     try:
-        db = SessionLocal()
+        db = database.SessionLocal()
         yield db
     finally:
         db.close()
 
 
-def create_random_key(length: int = 5) -> str:
-    chars = string.ascii_uppercase + string.digits
-    return "".join(secrets.choice(chars) for _ in range(length))
+# origins = [
+#     "http://localhost",
+#     "http://localhost:8080",
+# ]
 
-
-origins = [
-    "http://localhost",
-    "http://localhost:8080",
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],
+#     allow_credentials=False,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
 
 @app.get("/")
@@ -80,14 +47,14 @@ async def root(request: Request):
 
 @app.get("/url/")
 async def read_root(request: Request, db: Session = Depends(get_db)):
-    all_short_url = db.query(UrlMapping).all()
+    all_short_url = db.query(models.UrlMapping).all()
     for items in all_short_url:
         print(items)
     return templates.TemplateResponse("urlshort.html", {"request": request, "all_short_url": all_short_url})
 
 
 @app.post("/url/submit")
-async def get_url(og_url: Item, db: Session = Depends(get_db)):
+async def get_url(og_url: database.Item, db: Session = Depends(get_db)):
     original_url = og_url.url
     url_base = og_url.url_base
 
@@ -100,7 +67,7 @@ async def get_url(og_url: Item, db: Session = Depends(get_db)):
     short_url_key = hashlib.md5(short_url_hash.encode()).hexdigest()[:6]
     short_url = url_base + short_url_key
 
-    url_mapping = UrlMapping(
+    url_mapping = models.UrlMapping(
         original_url=original_url, short_url_key=short_url_key, short_url=short_url)
     db.add(url_mapping)
     db.commit()
@@ -112,8 +79,8 @@ async def get_url(og_url: Item, db: Session = Depends(get_db)):
 @app.get("/url/{short_url_key}")
 async def forward_to_target_url(short_url_key: str, db: Session = Depends(get_db)):
     print(short_url_key)
-    url_mapping = db.query(UrlMapping).filter(
-        UrlMapping.short_url_key == short_url_key).filter(UrlMapping.is_active == True).first()
+    url_mapping = db.query(models.UrlMapping).filter(
+        models.UrlMapping.short_url_key == short_url_key).filter(models.UrlMapping.is_active == True).first()
     if url_mapping:
         url_mapping.clicks += 1
         db.commit()
@@ -125,8 +92,8 @@ async def forward_to_target_url(short_url_key: str, db: Session = Depends(get_db
 @app.delete("/url/{short_url_key}")
 async def disable_target_url(short_url_key: str, db: Session = Depends(get_db)):
     print(short_url_key)
-    url_mapping = db.query(UrlMapping).filter(
-        UrlMapping.short_url_key == short_url_key).filter(UrlMapping.is_active == True).first()
+    url_mapping = db.query(models.UrlMapping).filter(
+        models.UrlMapping.short_url_key == short_url_key).filter(models.UrlMapping.is_active == True).first()
     if url_mapping:
         url_mapping.is_active = False
         db.commit()
