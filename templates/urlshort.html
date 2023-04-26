@@ -12,11 +12,21 @@
             #url-form {
                 width: 700px;
             }
+
+
         }
 
         @media screen and (max-width: 875px) {
             #url-form {
                 width: 600px;
+            }
+        }
+
+        @media screen and (max-width: 700px) {
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
             }
         }
 
@@ -27,10 +37,8 @@
         }
 
         @media screen and (max-width: 426px) {
-            table {
-                display: block;
-                overflow-x: auto;
-                white-space: nowrap;
+            #short-url {
+                font-size: 12px;
             }
         }
 
@@ -68,7 +76,6 @@
             margin-bottom: 16px;
         }
 
-        /* Style the form inputs */
         #url-form {
             display: flex;
             flex-direction: column;
@@ -91,7 +98,6 @@
             font-size: 16px;
         }
 
-        /* Style the submit button */
         input[type="submit"] {
             background-color: #4CAF50;
             color: white;
@@ -159,25 +165,16 @@
 
         button {
             background-color: #4CAF50;
-            /* set the background color */
             color: white;
-            /* set the font color */
             font-size: 16px;
-            /* set the font size */
             border-radius: 8px;
-            /* set the border radius to make the edges curved */
             padding: 8px 16px;
-            /* set the padding to make the button bigger */
             border: none;
-            /* remove the button border */
             cursor: pointer;
-            /* add a pointer cursor on hover */
         }
 
-        /* styles for hover state */
         button:hover {
             background-color: #3e8e41;
-            /* darken the background color on hover */
         }
     </style>
 
@@ -219,7 +216,7 @@
                         <td>{{ item.clicks }}</td>
                         <td>
                             {% if item.is_active == False %}
-                            <button id="{{item.short_url_key}}" disabled
+                            <button id="{{item.short_url_key}}"
                                 style="background-color: #d75050;">{{item.is_active}}</button>
                             {% else %}
                             <button id="{{item.short_url_key}}"
@@ -254,18 +251,15 @@
             body: JSON.stringify({ url, url_base })
         });
         const data = await response.json();
-        shortUrl.innerHTML = `Short URL: <a href="${data.original_url}">${data.short_url}</a>`;
-        console.log(data)
+        shortUrl.innerHTML = `Short URL: <a target="_blank" href="${data.original_url}">${data.short_url}</a>`;
     });
 
     async function disableButton(url) {
-        console.log(url)
         const currentUrl = window.location.href + url
         const response = await fetch(currentUrl, {
             method: 'DELETE'
         })
         const data = await response.json()
-        console.log(Object.keys(data).length)
         const length = Object.keys(data).length
         if (length === 1) {
             const selectedButton = document.getElementById(url)
