@@ -37,7 +37,7 @@ def shortened_url(url):
 
 @app.get("/")
 async def root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request, "url_shortener": "URL-Shortener", "reverse_shortener": "Reverse-URL-Shortener"})
+    return templates.TemplateResponse("index.html", {"request": request, "url_shortener": "URL-Shortener"})
 
 
 @app.get("/url/")
@@ -52,7 +52,8 @@ async def get_url(og_url: database.Item, db: Session = Depends(get_db)):
     url_base = og_url.url_base
 
     if not validators.url(original_url):
-        return HTTPException(status_code=400, detail="Your provided URL is not valid")
+        raise HTTPException(
+            status_code=400, detail="Your provided URL is not valid")
 
     short_url_key = shortened_url(original_url)
     short_url = url_base + short_url_key
@@ -70,7 +71,8 @@ async def forward_to_target_url(short_url_key: str, db: Session = Depends(get_db
         crud.update_db_clicks(db=db, db_url=url_mapping)
         return RedirectResponse(url_mapping.original_url)
     else:
-        return HTTPException(status_code=404, detail="URL does not exist")
+        raise HTTPException(
+            status_code=404, detail="URL does not exist or have been disabled")
 
 
 @app.delete("/url/{short_url_key}")
@@ -81,4 +83,4 @@ async def disable_target_url(short_url_key: str, db: Session = Depends(get_db)):
         message = f"Successfully disabled shortened URL for key: {short_url_key}"
         return {"detail": message}
     else:
-        return HTTPException(status_code=404, detail="URL have been disabled")
+        raise HTTPException(status_code=404, detail="URL have been disabled")
